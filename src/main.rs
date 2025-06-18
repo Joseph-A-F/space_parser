@@ -8,6 +8,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+use byte_unit::{Byte, UnitType};
 use filesize::{PathExt, file_real_size};
 use walkdir::WalkDir;
 
@@ -86,9 +87,14 @@ impl File {
     }
 
     fn preview_score(&self) {
+        let filesize_byte = Byte::from_u64(self.filesize);
+        let filesize = filesize_byte
+            .get_appropriate_unit(UnitType::Decimal)
+            .to_string();
+
         println!(
             "{:<40} | {:<30} | {:<20}  | {} minutes old",
-            self.name, self.score, self.filesize, self.age_minutes
+            self.name, self.score, filesize, self.age_minutes
         );
     }
 
@@ -142,7 +148,7 @@ fn main() {
     let mut preview_files: Vec<File> = Vec::new();
     // preview_files.append(files[0]);
     let mut index = 0;
-    let number_to_preview = 100;
+    let number_to_preview = 200;
     while preview_files.len() < number_to_preview && index < files.len() {
         let file = &files[index];
         let file_path = Path::new(&file.path);
@@ -167,7 +173,7 @@ fn load_files(mut space_parced: u64, working_dir: String) -> Vec<File> {
         if let Ok(ref file_result1) = file_result {
             let file = file_result.unwrap();
             let path = file.path();
-            let filename = file.file_name().to_str().unwrap();
+            let filename = file.path().to_str().unwrap();
 
             let file_real_size_result = file_real_size(path);
 
